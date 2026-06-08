@@ -4,8 +4,8 @@ Drafts a personalized cold outreach email for a job application.
 """
 
 import anthropic
-
-
+from agent.registry import registry
+@registry.tool
 def draft_email(
     job_description: str,
     candidate_name: str,

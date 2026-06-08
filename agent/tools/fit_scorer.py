@@ -1,13 +1,11 @@
-"""
-Tool: score_fit
-Scores how well a job description matches a resume using the Anthropic API.
-Returns a structured dict with score, matched_skills, gaps, and summary.
-"""
+# Tool: score_fit
+# Scores how well a job description matches a resume using the Anthropic API.
+# Returns a structured dict with score, matched_skills, gaps, and summary.
 
 import json
 import anthropic
-
-
+from agent.registry import registry
+@registry.tool
 def score_fit(job_description: str, resume_text: str) -> dict:
     client = anthropic.Anthropic()
 

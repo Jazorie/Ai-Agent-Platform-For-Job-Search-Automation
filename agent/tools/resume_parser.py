@@ -5,8 +5,8 @@ Extracts structured data from raw resume text.
 
 import json
 import anthropic
-
-
+from agent.registry import registry
+@registry.tool
 def parse_resume(resume_text: str) -> dict:
     client = anthropic.Anthropic()
 

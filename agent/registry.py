@@ -28,7 +28,7 @@ class ToolRegistry:
         return schemas
     def list_tools(self) -> list[str]:
         #returns a list of all registered tool names
-        return list(self._tool.keys())
+        return list(self._tools.keys())
     def build_schema(fn) -> dict:
         #inspects a function and builds a claude-compatible tool schema from it
         sig = inspect.signature(fn)
