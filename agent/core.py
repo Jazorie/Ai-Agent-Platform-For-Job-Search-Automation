@@ -7,14 +7,14 @@ import asyncio
 import json
 import time
 import uuid
+import anthropic
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from typing import Any
 from agent.memory import memory
-
-import anthropic
 from agent.registry import registry
 from agent.tools import fit_scorer, email_drafter, resume_parser
+from agent.retry import run_with_retry, is_failure, unwrap
 
 # ── Tool Registry ────────────────────────────────────────────────────────────
 # Each tool the agent can call is registered here.
@@ -119,16 +119,15 @@ class OrionAgent:
             tool_results = []
             for tool_use in tool_uses:
                 t_start = time.monotonic()
-                try:
-                    fn = TOOL_FN_MAP[tool_use.name]
-                    # Tools are sync for now; wrap in executor for async compatibility
-                    result = await asyncio.get_event_loop().run_in_executor(
-                        None, lambda: fn(**tool_use.input)
-                    )
-                    status = "success"
-                except Exception as e:
-                    result = {"error": str(e)}
+                fn = TOOL_FN_MAP[tool_use.name]
+                raw = await run_with_retry(fn, tool_use.input, tool_use.name)
+
+                if is_failure(raw):
+                    result = raw
                     status = "error"
+                else:
+                    result = unwrap(raw)
+                    status = "success"
 
                 duration = (time.monotonic() - t_start) * 1000
 
