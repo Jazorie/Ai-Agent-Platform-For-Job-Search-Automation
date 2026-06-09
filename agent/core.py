@@ -10,6 +10,7 @@ import uuid
 from dataclasses import dataclass, field, asdict
 from datetime import datetime
 from typing import Any
+from agent.memory import memory
 
 import anthropic
 from agent.registry import registry
@@ -155,4 +156,5 @@ class OrionAgent:
 
         trace.status = "complete"
         trace.total_duration_ms = round((time.monotonic() - wall_start) * 1000, 2)
+        memory.save(trace.to_dict())
         return trace

@@ -43,7 +43,7 @@ class AgentMemory:
             metadatas=[{
                 "run_id": trace["run_id"],
                 "started_at": trace["started_at"],
-                "fit_score": {",".join(final.get("skill_gaps", []))},
+                "fit_score": int(final.get("fit_score") or 0),
                 "status": trace["status"],
                 "goal": trace["goal"]
             }],
