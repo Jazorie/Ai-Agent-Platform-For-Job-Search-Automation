@@ -12,71 +12,15 @@ from datetime import datetime
 from typing import Any
 
 import anthropic
-
-from agent.tools.fit_scorer import score_fit
-from agent.tools.email_drafter import draft_email
-from agent.tools.resume_parser import parse_resume
+from agent.registry import registry
+from agent.tools import fit_scorer, email_drafter, resume_parser
 
 # ── Tool Registry ────────────────────────────────────────────────────────────
 # Each tool the agent can call is registered here.
 # Phase 2 will make this dynamic; for now it's explicit.
 
-TOOLS = [
-    {
-        "name": "score_fit",
-        "description": (
-            "Scores how well a job posting matches a candidate resume. "
-            "Returns a 0-100 fit score, a list of matched skills, a list of "
-            "skill gaps, and a short summary."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "job_description": {"type": "string", "description": "Full job posting text"},
-                "resume_text": {"type": "string", "description": "Candidate resume as plain text"},
-            },
-            "required": ["job_description", "resume_text"],
-        },
-    },
-    {
-        "name": "draft_email",
-        "description": (
-            "Drafts a short, personalized cold outreach email to a recruiter or "
-            "hiring manager based on the job posting and fit analysis."
-        ),
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "job_description": {"type": "string"},
-                "candidate_name": {"type": "string"},
-                "fit_summary": {"type": "string", "description": "Output from score_fit"},
-                "tone": {
-                    "type": "string",
-                    "enum": ["professional", "conversational", "enthusiastic"],
-                    "description": "Tone of the email",
-                },
-            },
-            "required": ["job_description", "candidate_name", "fit_summary"],
-        },
-    },
-    {
-        "name": "parse_resume",
-        "description": "Extracts structured information from raw resume text: skills, experience, education.",
-        "input_schema": {
-            "type": "object",
-            "properties": {
-                "resume_text": {"type": "string"},
-            },
-            "required": ["resume_text"],
-        },
-    },
-]
-
-TOOL_FN_MAP = {
-    "score_fit": score_fit,
-    "draft_email": draft_email,
-    "parse_resume": parse_resume,
-}
+TOOLS = registry.get_schemas()
+TOOL_FN_MAP = registry._tools
 
 
 # ── Trace & Step dataclasses ─────────────────────────────────────────────────
@@ -109,7 +53,7 @@ class AgentTrace:
 # ── Agent ────────────────────────────────────────────────────────────────────
 
 class OrionAgent:
-    def __init__(self, model: str = "claude-sonnet-4-20250514"):
+    def __init__(self, model: str = "claude-sonnet-4-6"):
         self.client = anthropic.Anthropic()
         self.model = model
 

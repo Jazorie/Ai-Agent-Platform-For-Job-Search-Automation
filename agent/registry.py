@@ -18,10 +18,11 @@ class ToolRegistry:
         return fn
     def get(self, name:str):
         #look up a tool by name, return none if not found
-        return self.tools.get(name)
+        return self._tools.get(name)
     def get_schemas(self) -> list:
         #builds the list of tool defintions claude needs
         #needs name, descript., input schema
+        schemas = []
         for name, fn in self._tools.items():
             schema = _build_schema(fn)
             schemas.append(schema)
@@ -29,7 +30,7 @@ class ToolRegistry:
     def list_tools(self) -> list[str]:
         #returns a list of all registered tool names
         return list(self._tools.keys())
-    def build_schema(fn) -> dict:
+def _build_schema(fn) -> dict:
         #inspects a function and builds a claude-compatible tool schema from it
         sig = inspect.signature(fn)
         properties = {}
